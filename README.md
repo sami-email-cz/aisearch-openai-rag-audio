@@ -175,3 +175,11 @@ This template uses [Managed Identity](https://learn.microsoft.com/entra/identity
 * [Blog post: VoiceRAG](https://aka.ms/voicerag)
 * [Demo video: VoiceRAG](https://youtu.be/vXJka8xZ9Ko)
 * [Azure OpenAI Realtime Documentation](https://github.com/Azure-Samples/aoai-realtime-audio-sdk/)
+
+## pridani avatara
+
+npm install @react-three/fiber @react-three/drei three --save --legacy-peer-deps
+
+vytvorit soubor
+app/frontend/src/components/ui/avatar.tsx
+

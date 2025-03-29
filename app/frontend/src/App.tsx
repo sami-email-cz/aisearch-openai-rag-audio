@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { GroundingFiles } from "@/components/ui/grounding-files";
 import GroundingFileView from "@/components/ui/grounding-file-view";
 import StatusMessage from "@/components/ui/status-message";
+// pridani avatara
+import Avatar from "@/components/ui/avatar";
 
 import useRealTime from "@/hooks/useRealtime";
 import useAudioRecorder from "@/hooks/useAudioRecorder";
@@ -72,6 +74,7 @@ function App() {
                 <h1 className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent md:text-7xl">
                     {t("app.title")}
                 </h1>
+                <Avatar /> {/* Přidání avatara */}
                 <div className="mb-4 flex flex-col items-center justify-center">
                     <Button
                         onClick={onToggleListening}
