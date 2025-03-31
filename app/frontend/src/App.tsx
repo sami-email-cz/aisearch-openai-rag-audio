@@ -47,17 +47,29 @@ function App() {
     const { reset: resetAudioPlayer, play: playAudio, stop: stopAudioPlayer } = useAudioPlayer();
     const { start: startAudioRecording, stop: stopAudioRecording } = useAudioRecorder({ onAudioRecorded: addUserAudio });
 
+    // Funkce pro hlasový výstup
+    const speak = (text: string) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(utterance);
+    };
+
     const onToggleListening = async () => {
         if (!isRecording) {
             startSession();
             await startAudioRecording();
             resetAudioPlayer();
 
+            // Avatar začne mluvit při spuštění nahrávání
+            speak("Recording has started. Please speak now.");
+
             setIsRecording(true);
         } else {
             await stopAudioRecording();
             stopAudioPlayer();
             inputAudioBufferClear();
+
+            // Avatar oznámí zastavení nahrávání
+            speak("Recording has stopped. Thank you.");
 
             setIsRecording(false);
         }
@@ -74,7 +86,7 @@ function App() {
                 <h1 className="mb-8 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-4xl font-bold text-transparent md:text-7xl">
                     {t("app.title")}
                 </h1>
-                <Avatar /> {/* Přidání avatara */}
+                <Avatar /> {/* Přidání komponenty Avatar */}
                 <div className="mb-4 flex flex-col items-center justify-center">
                     <Button
                         onClick={onToggleListening}
