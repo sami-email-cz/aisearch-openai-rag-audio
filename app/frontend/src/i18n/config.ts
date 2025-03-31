@@ -3,12 +3,17 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import HttpApi from "i18next-http-backend";
 import { initReactI18next } from "react-i18next";
 
-import enTranslation from "../locales/en/translation.json";
+import csTranslation from "../locales/cs/translation.json";
+/*import enTranslation from "../locales/en/translation.json";
 import esTranslation from "../locales/es/translation.json";
 import frTranslation from "../locales/fr/translation.json";
-import jaTranslation from "../locales/ja/translation.json";
+import jaTranslation from "../locales/ja/translation.json";*/
 
 export const supportedLngs: { [key: string]: { name: string; locale: string } } = {
+    cs: {
+        name: "Česky",
+        locale: "cs-CZ"
+    } /*,
     en: {
         name: "English",
         locale: "en-US"
@@ -24,7 +29,7 @@ export const supportedLngs: { [key: string]: { name: string; locale: string } } 
     ja: {
         name: "日本語",
         locale: "ja-JP"
-    }
+    }*/
 };
 
 i18next
@@ -35,12 +40,13 @@ i18next
     // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
         resources: {
+            cs: { translation: csTranslation } /*,
             en: { translation: enTranslation },
             es: { translation: esTranslation },
             fr: { translation: frTranslation },
-            ja: { translation: jaTranslation }
+            ja: { translation: jaTranslation }*/
         },
-        fallbackLng: "en",
+        fallbackLng: "cs",
         supportedLngs: Object.keys(supportedLngs),
         debug: import.meta.env.DEV,
         interpolation: {

@@ -1,0 +1,21 @@
+{
+    "app": {
+        "title": "Jak vam mohu pomoci?",
+        "footer": "Bea vase virtuálni recepcní",
+        "stopRecording": "Zastav náhrávání",
+        "startRecording": "Zapní nahrávání",
+        "stopConversation": "Zastavit konverzaci"
+    },
+    "status": {
+        "notRecordingMessage": "Zeptejte se jaké apartmány hotel nabízí",
+        "conversationInProgress": "Probíhá konverzace"
+    },
+    "history": {
+        "answerHistory": "Historie odpovědí",
+        "noHistory": "Zádná historie."
+    },
+    "groundingFiles": {
+        "title": "Zdrojové soubory",
+        "description": "Soubory použité na získání odpovědí."
+    }
+}

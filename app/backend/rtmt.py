@@ -4,12 +4,16 @@ import logging
 from enum import Enum
 from typing import Any, Callable, Optional
 
+
+
 import aiohttp
 from aiohttp import web
 from azure.core.credentials import AzureKeyCredential
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 logger = logging.getLogger("voicerag")
+
+trans_txt = ""
 
 class ToolResultDirection(Enum):
     TO_SERVER = 1
@@ -65,10 +69,11 @@ class RTMiddleTier:
     _tools_pending = {}
     _token_provider = None
 
-    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential, voice_choice: Optional[str] = None):
+    def __init__(self, endpoint: str, deployment: str, credentials: AzureKeyCredential | DefaultAzureCredential,  system_message : str, voice_choice: Optional[str] = None):
         self.endpoint = endpoint
         self.deployment = deployment
         self.voice_choice = voice_choice
+        self.system_message = system_message # MS pridano 20250331
         if voice_choice is not None:
             logger.info("Realtime voice choice set to %s", voice_choice)
         if isinstance(credentials, AzureKeyCredential):
@@ -80,19 +85,27 @@ class RTMiddleTier:
     async def _process_message_to_client(self, msg: str, client_ws: web.WebSocketResponse, server_ws: web.WebSocketResponse) -> Optional[str]:
         message = json.loads(msg.data)
         updated_message = msg.data
+        global trans_txt
+
         if message is not None:
             match message["type"]:
                 case "session.created":
                     session = message["session"]
                     # Hide the instructions, tools and max tokens from clients, if we ever allow client-side 
                     # tools, this will need updating
-                    session["instructions"] = ""
-                    session["tools"] = []
+                    session["instructions"] = self.system_message # ""
+                    session["tools"] = [tool.schema for tool in self.tools.values()] # []
                     session["voice"] = self.voice_choice
                     session["tool_choice"] = "none"
-                    session["max_response_output_tokens"] = None
+                    session["max_response_output_tokens"] = self.max_tokens # None
+                    print(f"_process_message_to_client session.created updated_message:{updated_message}")
                     updated_message = json.dumps(message)
-
+                case "response.audio_transcript.delta":
+                    trans_txt = trans_txt + f"{message['delta']}"
+                    # vytvoření textu z audio přepisu
+                    if any(char in message["delta"] for char in [".", "!", "?"]) and not any(char.isupper() for char in message["delta"]):
+                        print(trans_txt + "\n")
+                        trans_txt = ""
                 case "response.output_item.added":
                     if "item" in message and message["item"]["type"] == "function_call":
                         updated_message = None
@@ -152,7 +165,7 @@ class RTMiddleTier:
                                 replace = True
                         if replace:
                             updated_message = json.dumps(message)                        
-
+        
         return updated_message
 
     async def _process_message_to_server(self, msg: str, ws: web.WebSocketResponse) -> Optional[str]:
@@ -174,11 +187,23 @@ class RTMiddleTier:
                         session["voice"] = self.voice_choice
                     session["tool_choice"] = "auto" if len(self.tools) > 0 else "none"
                     session["tools"] = [tool.schema for tool in self.tools.values()]
+                    # TODO NENI NA AZURE presunout do parametr https://platform.openai.com/docs/api-reference/realtime-sessions/create MS pridann 20250331
+                    # Nastavení jazyka pro transkripci a odpovědi
+                    """session["input_audio_transcription"] = {
+                        "language": "cs",  # Jazyk pro transkripci (čeština)
+                        "model": "gpt-4o-mini-transcribe",  # Model pro transkripci
+                        "prompt": "PECR"  # Specifická slova pro přepis (volitelné)
+                    }
+                    session["output_language"] = "cs"  # Jazyk odpovědí (čeština)
+                    """
+                    print(f"_process_message_to_server updated_message:{updated_message} session:{session}")
                     updated_message = json.dumps(message)
-
+        
         return updated_message
 
     async def _forward_messages(self, ws: web.WebSocketResponse):
+        """
+        """
         async with aiohttp.ClientSession(base_url=self.endpoint) as session:
             params = { "api-version": self.api_version, "deployment": self.deployment}
             headers = {}
